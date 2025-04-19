@@ -122,6 +122,10 @@ irq_main2:
 			;lda #0x01
 			;sta 0xd020
 
+			ldx #0xd0
+wr1:		dex
+			bne wr1
+
 scrptrlo:	lda #.byte0 (SCREEN + 1*RRBSCREENWIDTH2)
 			sta 0xd060
 scrptrhi:	lda #.byte1 (SCREEN + 1*RRBSCREENWIDTH2)
