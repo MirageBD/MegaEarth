@@ -42,8 +42,6 @@ irq_main:
 			;lda #0x08
 			;sta 0xd020
 
-			jsr fillsinetables
-
 			jsr initfillspherepositions
 			jsr fillspherepositions
 
@@ -520,14 +518,14 @@ renderbumpline:
 			ldy #0
 			ldz frame
 bumpleftloop:
-			tya
-			eor #0xff				; frame: 255, 251, 247, 243, etc.
+			tya						; multiply bumps with larger numbers closer to the edges of the sphere:
+			eor #0xff				; y goes from 0-255 in steps of 4, so end up being: 255, 251, 247, 243, etc.
 			sta 0xd770				; MULTINA0
 			lda [zp:_Zp+234],z		; BUMPMEM + z
 			sta 0xd774				; MULTINB0
 			lda (zp:_Zp+242),y		; SCREEN + line*SCREENWIDTH2 + y
 			sec
-			sbc 0xd779				; MULTOUT1
+			sbc 0xd779				; MULTOUT1 (subtract the bumps from the position that's already in screen mem)
 			inc a
 			sta (zp:_Zp+242),y		; SCREEN + line*SCREENWIDTH2 + y
 			inz
@@ -543,7 +541,7 @@ bumpleftloop:
 			taz
 bumprightloop:
 			tya
-			eor #0xff
+			eor #0xff				; y: 255, 251, 247, 243, etc.
 			sta 0xd770				; MULTINA0
 			lda [zp:_Zp+234],z		; BUMPMEM
 			sta 0xd774				; MULTINB0
