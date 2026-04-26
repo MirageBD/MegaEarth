@@ -92,7 +92,7 @@ $(EXE_DIR)/%.o: %.s
 	as6502 --target=mega65 --list-file=$(@:%.o=%.lst) -o $@ $<
 
 $(EXE_DIR)/%.o: %.c
-	cc6502 --target=mega65 --code-model=plain -O2 --list-file=$(@:%.o=%.lst) -o $@ $<
+	cc6502 --target=mega65 -O2 --list-file=$(@:%.o=%.lst) -o $@ $<
 
 $(EXE_DIR)/%-debug.o: %.s
 	as6502 --target=mega65 --debug --list-file=$(@:%.o=%.lst) -o $@ $<

@@ -1001,7 +1001,7 @@ void modplay_init()
 		poke(0xd020, peek(0xd020));
 
 		// set value to 0xff
-		poke(0xd6f5, 0xff);
+		poke(0xd6f5, 0x3f);
 	}
 
 	modplay_disable();

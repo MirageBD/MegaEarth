@@ -56,9 +56,8 @@ irq_main:
 			;sta 0xd020
 
 			jsr initrenderbumps
-			;jsr renderbumps
 			jsr renderbumpline ; render first bump line
-			jsr renderbumpline ; render first bump line
+			jsr renderbumpline ; render second bump line
 
 			;lda #0x0f
 			;sta 0xd020
@@ -122,10 +121,6 @@ irq_main2:
 			;lda #0x01
 			;sta 0xd020
 
-			ldx #0xd0
-wr1:		dex
-			bne wr1
-
 scrptrlo:	lda #.byte0 (SCREEN + 1*RRBSCREENWIDTH2)
 			sta 0xd060
 scrptrhi:	lda #.byte1 (SCREEN + 1*RRBSCREENWIDTH2)
@@ -136,9 +131,17 @@ colptrlo:	lda #.byte0 (COLOR_RAM_OFFSET + 1*RRBSCREENWIDTH2)
 colptrhi:	lda #.byte1 (COLOR_RAM_OFFSET + 1*RRBSCREENWIDTH2)
 			sta 0xd065
 
-textyposlo:	lda #0x67
+textyposlo:	lda #0x67			; add 8 each time
 			sta 0xd04e
 textyposhi:	lda #0x00
+			sta 0xd04f
+
+			sec					; and subtract 2 immediately again, to fix having to wait
+			lda 0xd04e
+			sbc #2
+			sta 0xd04e
+			lda 0xd04f
+			sbc #0
 			sta 0xd04f
 
 			clc
@@ -509,20 +512,24 @@ initrenderbumps:
 
 renderbumpline:
 
+			;inc 0xd020
+
+			; z goes from frame+0  to frame+63  for left  half
+			; z goes from frame+64 to frame+127 for right half
+
 			ldy #0
 			ldz frame
 bumpleftloop:
 			tya
-			eor #0xff
-			sta 0xd770
-			lda [zp:_Zp+234],z
-			sta 0xd774
+			eor #0xff				; frame: 255, 251, 247, 243, etc.
+			sta 0xd770				; MULTINA0
+			lda [zp:_Zp+234],z		; BUMPMEM + z
+			sta 0xd774				; MULTINB0
+			lda (zp:_Zp+242),y		; SCREEN + line*SCREENWIDTH2 + y
 			sec
-			lda (zp:_Zp+242),y
-			sbc 0xd779
-			clc
-			adc #1
-			sta (zp:_Zp+242),y
+			sbc 0xd779				; MULTOUT1
+			inc a
+			sta (zp:_Zp+242),y		; SCREEN + line*SCREENWIDTH2 + y
 			inz
 			iny
 			iny
@@ -537,15 +544,14 @@ bumpleftloop:
 bumprightloop:
 			tya
 			eor #0xff
-			sta 0xd770
-			lda [zp:_Zp+234],z
-			sta 0xd774
+			sta 0xd770				; MULTINA0
+			lda [zp:_Zp+234],z		; BUMPMEM
+			sta 0xd774				; MULTINB0
+			lda (zp:_Zp+244),y		; SCREEN + line*SCREENWIDTH2 + 256 + y
 			clc
-			lda (zp:_Zp+244),y
-			adc 0xd779
-			sec
-			sbc #1
-			sta (zp:_Zp+244),y
+			adc 0xd779				; MULTOUT1
+			dec a
+			sta (zp:_Zp+244),y		; SCREEN + line*SCREENWIDTH2 + 256 + y
 			dez
 			iny
 			iny
@@ -572,19 +578,7 @@ bumprightloop:
 			inc zp:_Zp+235
 			inc zp:_Zp+235
 
-			rts
-
-; ------------------------------------------------------------------------------------
-
-renderbumps:
-
-			ldx #0
-bumpouterloop:
-			inc 0xd020
-			jsr renderbumpline
-			inx
-			cpx #30
-			bne bumpouterloop
+			;dec 0xd020
 
 			rts
 
