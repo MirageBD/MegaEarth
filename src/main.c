@@ -50,7 +50,7 @@ void main()
 	VIC4.CHR16			= 1;									// use wide character lookup (i.e. character data anywhere in memory)
 
 	VIC4.TEXTXPOSLSB	= 0x88;									// offset TEXTXPOS to center sphere
-	VIC4.SDBDRWDLSB		= 0x50;									// keep border at $50
+	VIC4.SDBDRWDLSB		= 0x58;									// set border to $58 instead of $50 to hide RRB bugs at right side of screen
 	
 	VIC2.MCM			= 1;									// set multicolor mode
 	VIC4.FCLRLO			= 1;									// lower block, i.e. 0-255		// use NCM and FCM for all characters

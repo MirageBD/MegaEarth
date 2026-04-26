@@ -7,6 +7,7 @@
 			.extern modplay_play
 			.extern program_update
 
+			.extern halfsine
 			.extern sine
 
 frame		.byte 0
@@ -90,6 +91,17 @@ irq_main:
 			lda #0x00
 			sta textyposhi+1
 
+			;lda #0xd8						; can go from 38 to 88 to d8 = a0 range
+			;sta 0xd04c
+
+			; good range is 48 to c8 (64 range)
+			ldx frame
+			lda sine,x
+			lsr a
+			clc
+			adc #0x48
+			sta 0xd04c
+
 			lda #0x35
 			sta 0xd012
 			sta raster+1
@@ -119,16 +131,6 @@ irq_main2:
 			;lda #0x01
 			;sta 0xd020
 
-scrptrlo:	lda #.byte0 (SCREEN + 1*RRBSCREENWIDTH2)
-			sta 0xd060
-scrptrhi:	lda #.byte1 (SCREEN + 1*RRBSCREENWIDTH2)
-			sta 0xd061
-
-colptrlo:	lda #.byte0 (COLOR_RAM_OFFSET + 1*RRBSCREENWIDTH2)
-			sta 0xd064
-colptrhi:	lda #.byte1 (COLOR_RAM_OFFSET + 1*RRBSCREENWIDTH2)
-			sta 0xd065
-
 textyposlo:	lda #0x67			; add 8 each time
 			sta 0xd04e
 textyposhi:	lda #0x00
@@ -141,6 +143,17 @@ textyposhi:	lda #0x00
 			lda 0xd04f
 			sbc #0
 			sta 0xd04f
+
+
+scrptrlo:	lda #.byte0 (SCREEN + 1*RRBSCREENWIDTH2)
+			sta 0xd060
+scrptrhi:	lda #.byte1 (SCREEN + 1*RRBSCREENWIDTH2)
+			sta 0xd061
+
+colptrlo:	lda #.byte0 (COLOR_RAM_OFFSET + 1*RRBSCREENWIDTH2)
+			sta 0xd064
+colptrhi:	lda #.byte1 (COLOR_RAM_OFFSET + 1*RRBSCREENWIDTH2)
+			sta 0xd065
 
 			clc
 			lda scrptrlo+1
@@ -439,7 +452,7 @@ fillsineouterloop:
 
 			ldy #127
 fillsineloop:
-			lda sine,y
+			lda halfsine,y
 			sta 0xd770
 			lda 0xd779
 			;clc
